@@ -35,9 +35,19 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("meditrack-release.keystore")
+            storePassword = "meditrack123"
+            keyAlias = "meditrack"
+            keyPassword = "meditrack123"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

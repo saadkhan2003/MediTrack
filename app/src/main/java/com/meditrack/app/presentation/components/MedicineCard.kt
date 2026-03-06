@@ -72,6 +72,7 @@ fun MedicineCard(
     item: TodayDoseItem,
     onTaken: (DoseSlot) -> Unit,
     onMissed: (DoseSlot) -> Unit,
+    onRevert: (DoseSlot) -> Unit,
     onDelete: (Medicine) -> Unit,
     isHighlighted: Boolean = false,
     modifier: Modifier = Modifier
@@ -253,7 +254,8 @@ fun MedicineCard(
                             DoseSlotRow(
                                 slot = slot,
                                 onTaken = { onTaken(slot) },
-                                onMissed = { onMissed(slot) }
+                                onMissed = { onMissed(slot) },
+                                onRevert = { onRevert(slot) }
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                         }
@@ -269,6 +271,7 @@ private fun DoseSlotRow(
     slot: DoseSlot,
     onTaken: () -> Unit,
     onMissed: () -> Unit,
+    onRevert: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val statusColor = when (slot.status) {
@@ -366,26 +369,48 @@ private fun DoseSlotRow(
                     }
                 }
             } else {
-                // Completed status badge
-                Box(
-                    modifier = Modifier
-                        .background(statusColor.copy(alpha = 0.15f), RoundedCornerShape(50))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            statusIcon,
-                            contentDescription = statusLabel,
-                            tint = statusColor,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = statusLabel,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = statusColor
-                        )
+                // Completed status badge with undo button
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .background(statusColor.copy(alpha = 0.15f), RoundedCornerShape(50))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                statusIcon,
+                                contentDescription = statusLabel,
+                                tint = statusColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = statusLabel,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = statusColor
+                            )
+                        }
+                    }
+                    // Undo button — visible only for TAKEN doses
+                    if (slot.status == DoseStatus.TAKEN || slot.status == DoseStatus.MISSED) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    CircleShape
+                                )
+                                .clickable { onRevert() }
+                                .semantics { contentDescription = "Undo ${statusLabel}" },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "↩",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -412,5 +437,5 @@ private fun MedicineCardPreview() {
             DoseSlot(scheduledTimeMillis = 0L, status = DoseStatus.PENDING, timeString = "08:00 PM")
         )
     )
-    MedicineCard(item = item, onTaken = {}, onMissed = {}, onDelete = {})
+    MedicineCard(item = item, onTaken = {}, onMissed = {}, onRevert = {}, onDelete = {})
 }

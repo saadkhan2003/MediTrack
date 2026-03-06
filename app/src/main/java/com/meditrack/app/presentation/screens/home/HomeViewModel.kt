@@ -44,7 +44,8 @@ class HomeViewModel @Inject constructor(
     private val getAllMedicinesUseCase: GetAllMedicinesUseCase,
     private val logDoseUseCase: LogDoseUseCase,
     private val deleteMedicineUseCase: DeleteMedicineUseCase,
-    private val doseLogRepository: DoseLogRepository
+    private val doseLogRepository: DoseLogRepository,
+    private val medicineRepository: MedicineRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -142,6 +143,22 @@ class HomeViewModel @Inject constructor(
                     if (status == DoseStatus.TAKEN) {
                         logDoseUseCase(newId.toInt(), status, System.currentTimeMillis())
                     }
+                }
+            }
+        }
+    }
+
+    fun revertDose(logId: Int, previousStatus: DoseStatus, medicineId: Int) {
+        viewModelScope.launch {
+            // Reset dose back to PENDING (loggedTime 0 means not yet logged)
+            doseLogRepository.updateDoseStatus(logId, DoseStatus.PENDING, 0L)
+            // Restore stock only if reverting a TAKEN dose
+            if (previousStatus == DoseStatus.TAKEN) {
+                val item = _uiState.value.todaySchedule.find { it.medicine.id == medicineId }
+                val medicine = item?.medicine
+                if (medicine != null) {
+                    val restored = (medicine.remainingStock + 1).coerceAtMost(medicine.totalStock)
+                    medicineRepository.updateRemainingStock(medicineId, restored)
                 }
             }
         }

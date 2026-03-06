@@ -43,33 +43,46 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val doseLogDao = entryPoint.doseLogDao()
                 val medicineDao = entryPoint.medicineDao()
 
-                val doseLog = doseLogDao.getDoseLogByMedicineAndTime(medicineId, scheduledTime)
+                val now = System.currentTimeMillis()
 
-                if (doseLog != null) {
-                    doseLogDao.updateDoseStatus(
-                        id = doseLog.id,
-                        status = status,
-                        loggedTime = System.currentTimeMillis()
+                // Fetch existing log — may be null if AlarmReceiver coroutine hasn't finished yet
+                var doseLog = doseLogDao.getDoseLogByMedicineAndTime(medicineId, scheduledTime)
+
+                if (doseLog == null) {
+                    // Race condition: notification action tapped before AlarmReceiver finished
+                    // creating the PENDING row. Create it now with the correct final status.
+                    val newLog = com.meditrack.app.data.local.entity.DoseLogEntity(
+                        medicineId = medicineId,
+                        medicineName = medicineName,
+                        scheduledTime = scheduledTime,
+                        loggedTime = now,
+                        status = status
                     )
+                    val insertedId = doseLogDao.insertDoseLog(newLog)
+                    if (insertedId == -1L) {
+                        // Row was inserted by AlarmReceiver between our read and now — try again
+                        doseLog = doseLogDao.getDoseLogByMedicineAndTime(medicineId, scheduledTime)
+                        if (doseLog != null) {
+                            doseLogDao.updateDoseStatus(id = doseLog.id, status = status, loggedTime = now)
+                        }
+                    }
+                } else {
+                    doseLogDao.updateDoseStatus(id = doseLog.id, status = status, loggedTime = now)
+                }
 
-                    if (status == "TAKEN") {
-                        val medicine = medicineDao.getMedicineById(medicineId)
-                        if (medicine != null) {
-                            val newStock = (medicine.remainingStock - 1).coerceAtLeast(0)
-                            medicineDao.updateRemainingStock(medicineId, newStock)
-
-                            if (newStock <= medicine.refillThreshold) {
-                                NotificationHelper.showRefillAlert(
-                                    context,
-                                    medicine.name,
-                                    newStock
-                                )
-                            }
+                // Decrement stock and show refill alert on TAKEN
+                if (status == "TAKEN") {
+                    val medicine = medicineDao.getMedicineById(medicineId)
+                    if (medicine != null) {
+                        val newStock = (medicine.remainingStock - 1).coerceAtLeast(0)
+                        medicineDao.updateRemainingStock(medicineId, newStock)
+                        if (newStock <= medicine.refillThreshold) {
+                            NotificationHelper.showRefillAlert(context, medicine.name, newStock)
                         }
                     }
                 }
 
-                // Dismiss the dose reminder notification
+                // Always dismiss the notification
                 NotificationHelper.dismissNotification(context, medicineId, scheduledTime)
 
             } catch (e: Exception) {

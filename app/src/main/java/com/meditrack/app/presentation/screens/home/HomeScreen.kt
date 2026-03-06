@@ -68,7 +68,6 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     var medicineToDelete by remember { mutableStateOf<Medicine?>(null) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
@@ -240,6 +239,14 @@ fun HomeScreen(
                                     DoseStatus.MISSED
                                 )
                             },
+                            onRevert = { slot ->
+                                val logId = slot.logId ?: return@MedicineCard
+                                viewModel.revertDose(
+                                    logId = logId,
+                                    previousStatus = slot.status,
+                                    medicineId = item.medicine.id
+                                )
+                            },
                             onDelete = { medicine ->
                                 medicineToDelete = medicine
                             },
@@ -250,29 +257,6 @@ fun HomeScreen(
             }
         }
     }
-
-    // FAB floats above the custom bottom nav bar
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 96.dp, end = 24.dp),
-        contentAlignment = Alignment.BottomEnd
-    ) {
-        FloatingActionButton(
-            onClick = onAddMedicine,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.semantics { contentDescription = "Add medicine" }
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Add medicine",
-                modifier = Modifier.size(28.dp)
-            )
-        }
-    }
-    } // end outer Box
     // Delete confirmation dialog
     medicineToDelete?.let { medicine ->
         AlertDialog(

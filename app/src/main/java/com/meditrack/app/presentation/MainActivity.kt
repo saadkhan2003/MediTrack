@@ -15,6 +15,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.darkColorScheme
@@ -27,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -226,6 +233,22 @@ fun MediTrackApp(initialHighlightMedicineId: Int? = null) {
                         }
                     }
                 )
+            }
+        },
+        floatingActionButton = {
+            if (currentRoute == "home") {
+                FloatingActionButton(
+                    onClick = { navController.navigate(Screen.AddMedicine.route) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.padding(bottom = 12.dp) // Subtle nudge above nav bar
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Add medicine"
+                    )
+                }
             }
         }
     ) { padding ->
