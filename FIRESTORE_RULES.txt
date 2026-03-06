@@ -1,0 +1,75 @@
+================================================================================
+FIRESTORE SECURITY RULES FOR MEDITRACK
+================================================================================
+
+PROBLEM: If app says "sync successful" but Firebase Console shows no data,
+it's likely a Security Rules issue.
+
+SOLUTION: Copy the rules below and paste them into Firebase Console:
+
+1. Go to: https://console.firebase.google.com/project/meditrack-de2fd/firestore/rules
+2. Replace ALL existing rules with the rules below
+3. Click "Publish"
+
+================================================================================
+RULES TO USE:
+================================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User-specific data - each user can only access their own data
+    match /users/{userId}/{document=**} {
+      // Allow read/write only if the user is signed in AND accessing their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Block all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+================================================================================
+EXPLANATION:
+================================================================================
+
+- Users can ONLY access data under: users/{their-uid}/...
+- This allows:
+  ✓ users/{uid}/medicines/{docId}
+  ✓ users/{uid}/doseLogs/{docId}
+  
+- Authentication required: request.auth != null
+- User isolation: request.auth.uid == userId
+
+================================================================================
+TESTING THE RULES:
+================================================================================
+
+After publishing:
+1. Rebuild and reinstall the app
+2. Sign in with Google
+3. Add a medicine
+4. Check Logcat for: "VERIFICATION SUCCESS" or "VERIFICATION FAILED"
+5. If VERIFICATION FAILED → rules are still blocking
+6. If VERIFICATION SUCCESS → check Firebase console again
+
+================================================================================
+IMPORTANT: CONSOLE ACCESS
+================================================================================
+
+With these rules, the Firebase Console may show "Insufficient permissions"
+when trying to browse data. This is NORMAL and SECURE.
+
+To view data in console, you need to either:
+A) Temporarily make rules more permissive (NOT recommended for production)
+B) Use the Firebase CLI or query with filters
+C) Check the app logs to verify data is there
+
+The data IS there if logs show "VERIFICATION SUCCESS" - the console just
+can't show it due to security rules protecting user privacy.
+
+================================================================================

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary -->
+    <color name="primary">#FF1954A3</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="primary_container">#FFD6E4FF</color>
+    <color name="on_primary_container">#FF001B3D</color>
+
+    <!-- Secondary -->
+    <color name="secondary">#FF22875A</color>
+    <color name="on_secondary">#FFFFFFFF</color>
+    <color name="secondary_container">#FFA8F5C8</color>
+    <color name="on_secondary_container">#FF00210F</color>
+
+    <!-- Error -->
+    <color name="error">#FFD32F2F</color>
+    <color name="on_error">#FFFFFFFF</color>
+    <color name="error_container">#FFFFDAD6</color>
+    <color name="on_error_container">#FF410002</color>
+
+    <!-- Background / Surface -->
+    <color name="background">#FFF5F6F8</color>
+    <color name="on_background">#FF1A1C1E</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="on_surface">#FF1A1C1E</color>
+    <color name="surface_variant">#FFEEF1F6</color>
+    <color name="on_surface_variant">#FF43474E</color>
+    <color name="outline">#FF73777F</color>
+
+    <!-- Status Colors -->
+    <color name="status_taken">#FF22875A</color>
+    <color name="status_missed">#FFD32F2F</color>
+    <color name="status_pending">#FF9E9E9E</color>
+
+    <!-- Dark Theme -->
+    <color name="primary_dark">#FFA9C7FF</color>
+    <color name="on_primary_dark">#FF003063</color>
+    <color name="primary_container_dark">#FF10458B</color>
+    <color name="background_dark">#FF1A1C1E</color>
+    <color name="on_background_dark">#FFE2E2E6</color>
+    <color name="surface_dark">#FF1A1C1E</color>
+    <color name="on_surface_dark">#FFE2E2E6</color>
+    <color name="surface_variant_dark">#FF43474E</color>
+
+    <!-- Medicine Card Colors -->
+    <color name="card_color_1">#FF1954A3</color>
+    <color name="card_color_2">#FF22875A</color>
+    <color name="card_color_3">#FFE65100</color>
+    <color name="card_color_4">#FF7B1FA2</color>
+    <color name="card_color_5">#FFC62828</color>
+    <color name="card_color_6">#FF00838F</color>
+    <color name="card_color_7">#FF4E342E</color>
+    <color name="card_color_8">#FF37474F</color>
+
+    <!-- Launcher Icon Background -->
+    <color name="ic_launcher_background">#FF1954A3</color>
+</resources>
